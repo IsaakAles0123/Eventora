@@ -38,4 +38,18 @@ router.get('/events', (_req, res) => {
   res.json({ events });
 });
 
+router.get('/users', (_req, res) => {
+  const users = db
+    .prepare(
+      `SELECT u.id, u.name, u.email, u.role, u.created_at,
+              (SELECT COUNT(*) FROM registrations r
+               WHERE r.user_id = u.id AND r.status = 'active') AS active_registrations
+       FROM users u
+       ORDER BY u.created_at ASC`
+    )
+    .all();
+
+  res.json({ users });
+});
+
 module.exports = router;

@@ -14,6 +14,7 @@ const emptyForm = {
 export default function AdminPage() {
   const [stats, setStats] = useState(null);
   const [events, setEvents] = useState([]);
+  const [users, setUsers] = useState([]);
   const [form, setForm] = useState(emptyForm);
   const [image, setImage] = useState(null);
   const [editingId, setEditingId] = useState(null);
@@ -23,9 +24,14 @@ export default function AdminPage() {
   const [busy, setBusy] = useState(false);
 
   async function refresh() {
-    const [s, e] = await Promise.all([api('/api/admin/stats'), api('/api/admin/events')]);
+    const [s, e, u] = await Promise.all([
+      api('/api/admin/stats'),
+      api('/api/admin/events'),
+      api('/api/admin/users'),
+    ]);
     setStats(s);
     setEvents(e.events);
+    setUsers(u.users);
   }
 
   useEffect(() => {
@@ -131,6 +137,34 @@ export default function AdminPage() {
           </div>
         </div>
       )}
+
+      <h2 className="section-title">Пользователи</h2>
+      <div className="admin-table-wrap">
+        <table className="admin-table">
+          <thead>
+            <tr>
+              <th>Имя</th>
+              <th>Email</th>
+              <th>Роль</th>
+              <th>Активные записи</th>
+              <th>Регистрация</th>
+            </tr>
+          </thead>
+          <tbody>
+            {users.map((user) => (
+              <tr key={user.id}>
+                <td>
+                  <strong>{user.name}</strong>
+                </td>
+                <td>{user.email}</td>
+                <td>{user.role === 'admin' ? 'Администратор' : 'Пользователь'}</td>
+                <td>{user.active_registrations}</td>
+                <td>{user.created_at}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
 
       {message && <div className="alert alert-ok">{message}</div>}
       {error && <div className="alert alert-error">{error}</div>}
